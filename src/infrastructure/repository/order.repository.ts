@@ -8,6 +8,7 @@ import OrderItem from "../../domain/entity/order_item";
 
 export default class OrderRepository implements OrderRepositoryInterface{
 
+    
     async create(entity: Order): Promise<void> {
         await OrderModel.create(
             {
