@@ -1,11 +1,16 @@
 import Address from "../../domain/entity/address";
 import Customer from "../../domain/entity/customer";
+import EventDispatcher from "../../domain/event/@shared/event-dispatcher";
+import CostumerCreatedEvent from "../../domain/event/product/costumer-created.event";
+import EnviaConsoleLog1Handler from "../../domain/event/product/handler/print-log1.handler";
+import EnviaConsoleLog2Handler from "../../domain/event/product/handler/print-log2.handler";
 import CustomerRepositoryInterface from "../../domain/repository/customer-repository.interface"
 import CustomerModel from "../db/sequelize/model/customer.model";
 
 export default class CustomerRepository implements CustomerRepositoryInterface{
 
     async create(entity: Customer): Promise<void> {
+    
         await CustomerModel.create({
             id: entity.id,
             name: entity.name,
@@ -16,6 +21,16 @@ export default class CustomerRepository implements CustomerRepositoryInterface{
             active: entity.isActive(),
             rewardPoints: entity.rewardPoints,
         });
+        // const eventDispatcher = new EventDispatcher();
+        // const eventHandler = new EnviaConsoleLog1Handler();
+        // const eventHandler2 = new EnviaConsoleLog2Handler();
+
+        // eventDispatcher.register("CostumerCreatedEvent", eventHandler);
+        // eventDispatcher.register("CostumerCreatedEvent", eventHandler2)
+
+        // const costumerCreatedEvent = new CostumerCreatedEvent(entity);
+        // eventDispatcher.notity(costumerCreatedEvent);
+
     }
 
     async update(entity: Customer): Promise<void> {

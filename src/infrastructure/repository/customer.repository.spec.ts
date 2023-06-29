@@ -3,6 +3,10 @@ import CustomerModel from '../db/sequelize/model/customer.model';
 import CustomerRepository from './customer.repository';
 import Customer from '../../domain/entity/customer';
 import Address from '../../domain/entity/address';
+import EventDispatcher from '../../domain/event/@shared/event-dispatcher';
+import EnviaConsoleLog1Handler from '../../domain/event/product/handler/print-log1.handler';
+import EnviaConsoleLog2Handler from '../../domain/event/product/handler/print-log2.handler';
+import CostumerCreatedEvent from '../../domain/event/product/costumer-created.event';
 
 describe("Product repository test", ()=> {
 
@@ -45,6 +49,47 @@ describe("Product repository test", ()=> {
         
         });
     });
+
+    it("should create and notify with event", async () => {
+        const customerRepository = new CustomerRepository();
+
+        const eventDispatcher = new EventDispatcher();
+        const eventHandler = new EnviaConsoleLog1Handler();
+        const eventHandler2 = new EnviaConsoleLog2Handler();
+        const spyEventHandler = jest.spyOn(eventHandler, "handle");
+        const spyEventHandler2 = jest.spyOn(eventHandler2, "handle");
+
+        eventDispatcher.register("CostumerCreatedEvent", eventHandler);
+        eventDispatcher.register("CostumerCreatedEvent", eventHandler2)
+        expect(eventDispatcher.getEventHandlers["CostumerCreatedEvent"][0]).toMatchObject(eventHandler);
+        expect(eventDispatcher.getEventHandlers["CostumerCreatedEvent"][1]).toMatchObject(eventHandler2);
+
+        
+        const customer = new Customer("1", "Alex");
+        const address = new Address( "sem saida", 12, "zip12", "SP");
+        customer.address = address;
+        await customerRepository.create(customer);
+
+        //const costumerCreatedEvent = new CostumerCreatedEvent(customer);
+        //eventDispatcher.notity(costumerCreatedEvent);
+
+        const customerModel = await CustomerModel.findOne({where: {id:"1"}});
+
+        expect(customerModel.toJSON()).toStrictEqual({
+            id: "1",
+            name: customer.name,
+            street: address.street,
+            number: address.number,
+            zipcode: address.zip,
+            city: address.city,
+            active: customer.isActive(),
+            rewardPoints: customer.rewardPoints,
+        
+        });
+        expect(spyEventHandler).toHaveBeenCalled();
+        expect(spyEventHandler2).toHaveBeenCalled();
+    });
+
 
     it("should update a costumer", async () => {
         const customerRepository = new CustomerRepository();
