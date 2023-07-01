@@ -31,12 +31,14 @@ export default class EventDispatcher implements EventDispatcherInterface{
         this.eventHandlers = {};
     }
 
-    notity(event: EventInterface): void{
+    notity(event: EventInterface): void{       
 
-        const evenName = event.constructor.name;
-        if(this.eventHandlers[evenName]){
-            this.eventHandlers[evenName].forEach((eventHandler) => {
-                eventHandler.handle(event);
+        const eventName = event.constructor.name;
+        if(this.eventHandlers[eventName]){
+            this.eventHandlers[eventName].forEach((eventHandler) => {
+                if(eventHandler !== undefined) {
+                    eventHandler.handle(event);
+                }
             })
         }
         

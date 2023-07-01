@@ -1,17 +1,46 @@
+import EventDispatcher from "../event/@shared/event-dispatcher";
+import CustomerCreatedEvent from "../event/customer/customer-created.event";
+import EnviaConsoleLog1Handler from "../event/customer/handler/print-log1.handler";
+import EnviaConsoleLog2Handler from "../event/customer/handler/print-log2.handler";
+import EnviaConsoleLogChangeAddressHandler from "../event/customer/handler/print-log-change-address.handler";
 import Address from "./address";    
+import CustomerChangeAddressEvent from "../event/customer/customer-change-address-event";
 
 export default class Customer{
     
     private _id: string;
-    private _name: string = "";
+    private _name: string;
     private _address!: Address; //Inicializa em branco (!)
-    private _active: boolean = false;
+    private _active: boolean = true;
     private _rewardPoints: number = 0;
+    private _eventDispatcher : EventDispatcher;
+    private static _eventHandler : EnviaConsoleLog1Handler;
+    private static _eventHandler2 : EnviaConsoleLog2Handler;
+    private static _eventChangeAddressHandler : EnviaConsoleLogChangeAddressHandler;
 
     constructor(id: string, name:string){
         this._id = id;
         this._name = name;
         this.validate();
+        this._eventDispatcher = new EventDispatcher();
+        this._eventDispatcher.register("CustomerCreatedEvent", Customer._eventHandler);
+        this._eventDispatcher.register("CustomerCreatedEvent", Customer._eventHandler2);
+        this._eventDispatcher.register("CustomerChangeAddressEvent", Customer._eventChangeAddressHandler)
+
+        const customerCreatedEvent = new CustomerCreatedEvent({
+            id: this._id,
+            name: this._name,
+        });
+         this._eventDispatcher.notity(customerCreatedEvent);
+    }
+    static getChangeAddressEventHandler(){
+        return Customer._eventChangeAddressHandler = new EnviaConsoleLogChangeAddressHandler();
+    }
+    static getEventHandler1(){
+        return Customer._eventHandler = new EnviaConsoleLog1Handler();
+    }
+    static getEventHandler2(){
+        return Customer._eventHandler2 = new EnviaConsoleLog2Handler();
     }
 
     validate(){
@@ -57,6 +86,13 @@ export default class Customer{
 
     changeAddress(address: Address) {
         this._address = address;
+
+        const customerChangeAddressEvent = new CustomerChangeAddressEvent({
+            id: this._id,
+            name: this._name,
+            address: this._address,
+        });
+         this._eventDispatcher.notity(customerChangeAddressEvent);
     }
     
     get id(): string{
@@ -78,6 +114,7 @@ export default class Customer{
     set address(address: Address){
         this._address = address;
     }
+
 
 
 }

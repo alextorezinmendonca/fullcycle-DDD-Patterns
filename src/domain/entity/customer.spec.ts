@@ -72,4 +72,24 @@ describe("Customer unit tests", () =>{
 
     });
 
+    it("Should create customer and notify", () => {
+        const spyEventHandler = jest.spyOn(Customer.getEventHandler1(), "handle");
+        const spyEventHandler2 = jest.spyOn(Customer.getEventHandler2(), "handle");
+        const customer = new Customer("1", "Alex");
+
+        expect(spyEventHandler).toHaveBeenCalled();
+        expect(spyEventHandler2).toHaveBeenCalled();
+    });
+
+
+    it("Should update customer address and notify", () => {
+        const spyEventHandler = jest.spyOn(Customer.getChangeAddressEventHandler(), "handle");
+        const customer = new Customer("1", "Alex");
+        const address = new Address("Rua", 12, "123", "Rio preto");
+        customer.changeAddress(address);
+
+
+        expect(spyEventHandler).toHaveBeenCalled();
+
+    });
 });
